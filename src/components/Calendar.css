@@ -1,0 +1,9 @@
+.Calendar {
+    height: 90vh;
+}
+
+.view-select {
+    z-index: 10;
+    min-width: auto;
+    width: max-content;
+}
