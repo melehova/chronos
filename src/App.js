@@ -1,5 +1,6 @@
 import './App.css';
 import Calendar from './components/Calendar';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
@@ -8,7 +9,7 @@ function App() {
         women monkey
       </header>
       <div>calendar</div>
-      <Calendar />
+      <div className='container'><Calendar /></div>
     </div>
   );
 }
