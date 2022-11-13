@@ -2,30 +2,26 @@ import { Calendar as BigCalendar, momentLocalizer, Views } from 'react-big-calen
 import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react'
 import CustomToolbar from './Toolbar.js';
 import PropTypes from 'prop-types'
+import Event from './Event.js';
 import moment from 'moment'
 import events from '../resources/events'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import './Calendar.css'
 import 'moment-timezone' // or 'moment-timezone/builds/moment-timezone-with-data[-datarange].js'. See their docs
 
 // Set the IANA time zone you want to use
-// moment.tz.setDefault('America/Chicago')
+moment.tz.setDefault('Europe/Kyiv')
+// moment.tz.setDefault('America/Cancun')
+
 
 const localizer = momentLocalizer(moment)
 const DnDBigCalendar = withDragAndDrop(BigCalendar)
 
-const Event = ({ event }) => {
-    return (
-        <span>
-            <strong>{event.title}</strong>
-            {event.desc && ':  ' + event.desc}
-        </span>
-    )
-}
-Event.propTypes = {
-    event: PropTypes.object,
-}
+
+
+
 // to hide selected event 'modal' if click outside of it 
 function useOnClickOutside(ref, handler) {
     useEffect(
@@ -62,7 +58,7 @@ function useOnClickOutside(ref, handler) {
 //     label: PropTypes.string.isRequired,
 // }
 
-const Calendar = ({ dayLayoutAlgorithm = 'overlap'
+const Calendar = ({ dayLayoutAlgorithm = 'no-overlap'
 }) => {
     const [myEvents, setMyEvents] = useState(events)
     const [chosenView, setView] = useState(Views.WORK_WEEK)
@@ -70,7 +66,9 @@ const Calendar = ({ dayLayoutAlgorithm = 'overlap'
     const [selectedPosition, setSelectedPosition] = useState({ left: 0, right: 0, top: 0, bottom: 0 })
 
     const ref = useRef();
-    useOnClickOutside(ref, () => setSelectedEvent(null));
+    useOnClickOutside(ref, () => {
+        setSelectedEvent(null)
+    });
 
     const onView = useCallback((newView) => setView(newView), [setView])
 
@@ -113,23 +111,69 @@ const Calendar = ({ dayLayoutAlgorithm = 'overlap'
 
     const handleSelectEvent = useCallback(
         (event, e) => {
-            console.log(event, e)
+            // console.log(event, (event.end - event.start) / (1000 * 3600 * 24))
             const pos = e.target.getBoundingClientRect()
             const left = Math.abs(pos.x - 500) + 'px'
+            const top = pos.y + pos.height + 5 + 'px'
             setSelectedPosition({
                 left: left,
-                top: `${pos.y}px`
+                top: top,
+                zIndex: 15,
             })
             return setSelectedEvent(event)
         },
         []
     )
 
+    const eventPropGetter = useCallback(
+        (event, start, end, isSelected) => ({
+            ...((event.allDay || (event.end - event.start) / (1000 * 3600 * 24) === 1) && {
+                className: 'allday',
+                // style: {
+                //     background: 'yellow',
+                // }
+            }),
+            ...((localizer.diff(start, localizer.ceil(end, 'day'), 'day') < 1) && {
+                style: {
+                    background: 'transparent',
+                }
+            }),
+            ...(((event.end - event.start) / (1000 * 3600 * 24) === 1) && {
+                style: {
+                    background: event.color,
+                }
+            }),
+            // event
+            // ...(isSelected && {
+            //     style: {
+            //         backgroundColor: '#fff',
+            //     },
+            // }),
+            // ...(moment(start).hour() < 12 && {
+            //     className: 'powderBlue',
+            // }),
+            // ...(event.title.includes('Meeting') && {
+            //     className: 'darkGreen',
+            // }),
+        }),
+        []
+    )
+
+    // function evWr(event) {
+    //     return <div>{event.title}</div>
+    // }
     const { components, defaultDate, scrollToTime } = useMemo(
         () => ({
             components: {
-                event: Event,
+                // event: Event.Week,
                 toolbar: CustomToolbar,
+                // week: {
+                //     event: Event.Week
+                // }
+                month: {
+                    event: Event.Month
+                }
+                // eventWrapper: EventWrapper,
                 // day: { header: MyCustomHeader },
                 // week: { header: MyCustomHeader },
                 // month: { header: MyCustomHeader },
@@ -144,33 +188,37 @@ const Calendar = ({ dayLayoutAlgorithm = 'overlap'
         <div className="Calendar">
             {selectedEvent &&
                 <div id='selected-event'
-                    style={selectedPosition}
                     className='col-4'
-                    ref={ref}>
-                    {selectedEvent.title}
+                    ref={ref}
+                    style={selectedPosition}>
+                    {selectedEvent.title} {selectedEvent.start.toLocaleString()} {selectedEvent.end.toLocaleString()}
                 </div>}
             <DnDBigCalendar
                 className='col-12'
+                components={components}
                 dayLayoutAlgorithm={dayLayoutAlgorithm}
                 defaultDate={defaultDate}
-                components={components}
-                localizer={localizer}
-                events={myEvents}
-                view={chosenView}
-                views={Object.values(Views)}
-                onView={onView}
-                startAccessor="start"
+                // draggableAccessor="isDraggable"
+                draggableAccessor={(event) => true}
+                // resizebleAccessor={(event) => true}
                 endAccessor="end"
-                // draggableAccessor={(event) => true}
+                eventPropGetter={eventPropGetter}
+                events={myEvents}
+                localizer={localizer}
                 onEventDrop={moveEvent}
                 onEventResize={resizeEvent}
                 onSelectEvent={handleSelectEvent}
                 onSelectSlot={handleSelectSlot}
-                selectable
-                scrollToTime={scrollToTime}
-                // toolbar={false}
+                onView={onView}
                 popup
                 resizable
+                scrollToTime={scrollToTime}
+                selectable
+                showMultiDayTimes
+                startAccessor="start"
+                // toolbar={false}
+                view={chosenView}
+                views={Object.values(Views)}
             />
         </div>
     )

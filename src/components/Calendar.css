@@ -1,5 +1,6 @@
 .Calendar {
     height: 90vh;
+    font-size: 14px;
 }
 
 .view-select {
@@ -10,13 +11,20 @@
 
 .rbc-event,
 .rbc-day-slot .rbc-background-event {
-    background: #73F2EB;
+    background: #00CCC0;
     color: #0D0D0D;
+}
+
+.rbc-event:focus,
+.rbc-day-slot .rbc-background-event:focus {
+    outline: none;
+    border: none;
 }
 
 .rbc-event.rbc-selected,
 .rbc-day-slot .rbc-selected.rbc-background-event {
-    background: #60C3BE;
+    background: #73F2EB;
+    z-index: 14;
 }
 
 .rbc-ellipsis,
@@ -45,8 +53,32 @@
     align-items: center;
     width: max-content;
     padding: 1em;
+    font-weight: 500;
 }
 
 .rbc-btn-group {
     display: flex;
+}
+
+.allday {
+    background-color:yellow;
+}
+
+.powderBlue {
+    background-color: powderblue;
+}
+
+.darkGreen {
+    background-color: darkgreen;
+}
+
+.color-point {
+    height: 10px;
+    width: 10px;
+    background-color: gray;
+    border-radius: 50%;
+}
+
+.rbc-event-content {
+    font-weight: 500;
 }

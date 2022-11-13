@@ -31,7 +31,7 @@ const selectStyles = {
     option: (provided, state) => ({
         ...provided,
         background: 'white',
-        color: 'black',
+        color: '#0D0D0D',
         textAlign: 'start',
         ':hover': {
             background: '#f5f5f5',
@@ -46,6 +46,7 @@ const selectStyles = {
     }),
     singleValue: (pr, st) => ({
         ...pr,
+        color: '#0D0D0D',
         fontWeight: 500,
     }),
 }
